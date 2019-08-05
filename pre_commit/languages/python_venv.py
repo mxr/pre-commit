@@ -52,4 +52,4 @@ def make_venv(envdir, python):
 
 
 _interface = python.py_interface(ENVIRONMENT_DIR, make_venv)
-in_env, healthy, run_hook, install_environment = _interface
+in_env, healthy, run_hook, install_environment, update_dependencies = _interface

@@ -13,6 +13,7 @@ from pre_commit.util import cmd_output
 ENVIRONMENT_DIR = 'swift_env'
 get_default_version = helpers.basic_get_default_version
 healthy = helpers.basic_healthy
+update_dependencies = helpers.no_install  # TODO
 BUILD_DIR = '.build'
 BUILD_CONFIG = 'release'
 

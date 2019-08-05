@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import contextlib
 import os
+import re
 import sys
 
 import pre_commit.constants as C
@@ -127,6 +128,9 @@ def norm_version(version):
     return os.path.expanduser(version)
 
 
+BASE_NAME_REGEX = re.compile(r'[^!=><]+')
+
+
 def py_interface(_dir, _make_venv):
     @contextlib.contextmanager
     def in_env(prefix, language_version):
@@ -150,6 +154,30 @@ def py_interface(_dir, _make_venv):
 
     def install_environment(prefix, version, additional_dependencies):
         additional_dependencies = tuple(additional_dependencies)
+        with in_py_env(prefix, version):
+            helpers.run_setup_cmd(
+                prefix, ('pip', 'install', '.') + additional_dependencies,
+            )
+
+    def update_dependencies(prefix, version, additional_dependencies):
+        additional_dependencies = tuple(additional_dependencies)
+        with in_py_env(prefix, version):
+            helpers.run_setup_cmd(
+                prefix,
+                ('pip', 'install', '-U', '.') + additional_dependencies,
+            )
+            _, stdout, _ = helpers.run_setup_cmd(
+                prefix, ('pip', 'freeze'),
+            )
+
+        deps_by_base = {dep.partition('==')[0].replace('_', '-'): dep for dep in stdout.splitlines()}
+        updated_deps = []
+        for dep in additional_dependencies:
+            base = BASE_NAME_REGEX.match(dep).replace('_', '-')
+            updated_deps.append(deps_by_base.get(base, dep))
+
+    @contextlib.contextmanager
+    def in_py_env(prefix, version):
         directory = helpers.environment_dir(_dir, version)
 
         env_dir = prefix.path(directory)
@@ -159,12 +187,9 @@ def py_interface(_dir, _make_venv):
             else:
                 python = os.path.realpath(sys.executable)
             _make_venv(env_dir, python)
-            with in_env(prefix, version):
-                helpers.run_setup_cmd(
-                    prefix, ('pip', 'install', '.') + additional_dependencies,
-                )
+            return in_env(prefix, version)
 
-    return in_env, healthy, run_hook, install_environment
+    return in_env, healthy, run_hook, install_environment, update_dependencies
 
 
 def make_venv(envdir, python):
@@ -174,4 +199,4 @@ def make_venv(envdir, python):
 
 
 _interface = py_interface(ENVIRONMENT_DIR, make_venv)
-in_env, healthy, run_hook, install_environment = _interface
+in_env, healthy, run_hook, install_environment, update_dependencies = _interface

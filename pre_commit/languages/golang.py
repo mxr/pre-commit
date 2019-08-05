@@ -17,6 +17,7 @@ from pre_commit.util import rmtree
 ENVIRONMENT_DIR = 'golangenv'
 get_default_version = helpers.basic_get_default_version
 healthy = helpers.basic_healthy
+update_dependencies = helpers.no_install  # TODO
 
 
 def get_env_patch(venv):

@@ -16,6 +16,7 @@ from pre_commit.util import cmd_output
 ENVIRONMENT_DIR = 'node_env'
 get_default_version = helpers.basic_get_default_version
 healthy = helpers.basic_healthy
+update_dependencies = helpers.no_install  # TODO
 
 
 def _envdir(prefix, version):

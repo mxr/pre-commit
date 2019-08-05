@@ -16,6 +16,7 @@ ENVIRONMENT_DIR = 'docker'
 PRE_COMMIT_LABEL = 'PRE_COMMIT'
 get_default_version = helpers.basic_get_default_version
 healthy = helpers.basic_healthy
+update_dependencies = helpers.no_install
 
 
 def md5(s):  # pragma: windows no cover
